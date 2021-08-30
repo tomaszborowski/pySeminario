@@ -3,7 +3,9 @@
 """
 a collection of classes and functions for pyseminario
 
-Authors: Szymon Szrajer, Tomasz Borowski
+Authors: Szymon Szrajer, Tomasz Borowski, Zuzanna Wojdyla
+
+branch: zuza_debug
 """
 
 import numpy as np
@@ -130,8 +132,6 @@ class Bond(object):
     def set_k(self):
         p1 = 0.5 * sum(self.lambdas_ab[i] * np.abs(np.dot(self.u_ab, self.eig_vecs_ab[:, i])) for i in range(3))
         p2 = 0.5 * sum(self.lambdas_ba[i] * np.abs(np.dot(self.u_ab, self.eig_vecs_ba[:, i])) for i in range(3))
-#        p1 = 0.5 * sum(np.abs(self.lambdas_ab[i]) * np.abs(np.dot(self.u_ab, self.eig_vecs_ab[:, i])) for i in range(3)) # as in Hess2FF
-#        p2 = 0.5 * sum(np.abs(self.lambdas_ba[i]) * np.abs(np.dot(self.u_ab, self.eig_vecs_ba[:, i])) for i in range(3)) # as in Hess2FF
         self.k = p1 + p2
 
 
@@ -171,8 +171,12 @@ class Angle(object):
         at_nbrs.sort()                        
         self.label = tuple( [at_nbrs[0], b,  at_nbrs[1]] )
     def set_deg_value(self):   
+        label_ab = self.bonds[0].get_label()
+        label_cb = self.bonds[1].get_label()
         u_ab = self.bonds[0].get_u_ab()
         u_cb = self.bonds[1].get_u_ab()
+        if label_ab[0] == label_cb[1] or label_ab[1] == label_cb[0]:
+            u_cb = -1.0 * u_cb
         self.deg_value = np.degrees( np.arccos( np.dot(u_ab, u_cb) ) )
     def set_u_n(self):
         u_ab = self.bonds[0].get_u_ab()
@@ -186,31 +190,23 @@ class Angle(object):
         u_cb = self.bonds[1].get_u_ab()
         self.u_pc = np.cross(u_cb, self.u_n)
     def set_k(self):     
-        lambdas_ab = self.bonds[0].get_lambdas_ab()
         lambdas_ba = self.bonds[0].get_lambdas_ba()
-        lambdas_cb = self.bonds[1].get_lambdas_ab()
         lambdas_bc = self.bonds[1].get_lambdas_ba()        
-        eig_vecs_ab = self.bonds[0].get_eig_vecs_ab()
         eig_vecs_ba = self.bonds[0].get_eig_vecs_ba()
-        eig_vecs_cb = self.bonds[1].get_eig_vecs_ab()
         eig_vecs_bc = self.bonds[1].get_eig_vecs_ba()        
         r_ab = self.bonds[0].get_bond_length()
         r_bc = self.bonds[1].get_bond_length()
         #
-        p11 = 0.5 * sum(lambdas_ab[i] * np.abs(np.dot(self.u_pa, eig_vecs_ab[:, i])) for i in range(3))
-        p12 = 0.5 * sum(lambdas_ba[i] * np.abs(np.dot(self.u_pa, eig_vecs_ba[:, i])) for i in range(3))
-#        p1 = r_ab**2 * (p11 + p12) # averaging as for bonds
-        p1 = r_ab**2 * 2.0 * p12 # no averaging, movement of A
-        
-        
-        p21 = 0.5 * sum(lambdas_cb[i] * np.abs(np.dot(self.u_pc, eig_vecs_cb[:, i])) for i in range(3))
-        p22 = 0.5 * sum(lambdas_bc[i] * np.abs(np.dot(self.u_pc, eig_vecs_bc[:, i])) for i in range(3))
-#        p2 = r_bc**2 * (p21 + p22) # averaging as for bonds
-        p2 = r_bc**2 * 2.0 * p22 # no averaging, movement of C
+        p12 = sum(lambdas_ba[i] * np.abs(np.dot(self.u_pa, eig_vecs_ba[:, i])) for i in range(3))
+        p1 = r_ab**2 * p12 # no averaging, movement of A
+        #
+        p22 = sum(lambdas_bc[i] * np.abs(np.dot(self.u_pc, eig_vecs_bc[:, i])) for i in range(3))
+        p2 = r_bc**2 * p22 # no averaging, movement of C
         
         k_inv = (1.0 / p1) + (1.0 / p2)
         self.k = 1.0 / k_inv
-        
+ 
+       
 def fchk_read_n_atoms(file):
     """
     Reads number of atoms from the fchk file
@@ -235,21 +231,23 @@ def fchk_read_n_atoms(file):
     return natom
 
 
-def which_line_pos_5_per_line(seq_number):
+def which_line_pos(seq_number, n_per_line):
     """ calculates 1-based line numbers and positions in a line
-    for data formated 5 items per line;
-    seq_number : (int) 1-based number of the data in the sequence"""
-    div = seq_number // 5
-    rem = seq_number % 5
+    for data formated n_per_line items per line;
+    seq_number : (int) 1-based number of the data in the sequence
+    n_per_line : (int) number of fields/items per line"""
+    div = seq_number // n_per_line
+    rem = seq_number % n_per_line
     if rem != 0:
         which_position = rem
     else:
-        which_position = 5
+        which_position = n_per_line
     if rem != 0:
         which_line = div+1
     else:
         which_line = div
     return which_line, which_position
+
 
 def gen_ster_list(line_pos_in_seq):
     """ generate a stearing list (used to read from 5-per-line block of data) from a list of 2-element tuples (line_nr, column_nr) 
@@ -293,7 +291,7 @@ def fchk_read_atoms(file, at_numbers):
     which_line = [] # list of relative 1-based line numbers with at numbers for atoms
     which_position = [] # list of 1-based position mumbers with at numbers for atoms
     for at_nr in at_numbers:
-        line, pos = which_line_pos_5_per_line(at_nr)
+        line, pos = which_line_pos(at_nr, 6)
         which_position.append(pos)
         which_line.append(line)
     max_line_nr = which_line[-1]
@@ -325,14 +323,16 @@ def fchk_read_atoms(file, at_numbers):
     line_pos_in_seq = []
     for at_nr in at_numbers:
         for i in range(3):
-            line, pos = which_line_pos_5_per_line(3*at_nr-2+i)
+            line, pos = which_line_pos(3*at_nr-2+i, 5)
             line_pos_in_seq.append( (line, pos) )
     skip_lines_tab = [] # a table with number of lines to be skipped   
     for i in range(3*n_atom_2_read):
         if i == 0:
             skip_lines_tab.append( line_pos_in_seq[i][0] - 1 )
         else:
-            skip_lines_tab.append( line_pos_in_seq[i][0] - line_pos_in_seq[i-1][0] - 1 )    
+            jump = ( line_pos_in_seq[i][0] - line_pos_in_seq[i-1][0] - 1 )
+            if jump != -1:
+                skip_lines_tab.append( jump )    
     ster_list = gen_ster_list(line_pos_in_seq)             
     # w pliku file wyszukaj odp linii
     file.seek(0)
@@ -391,9 +391,9 @@ def fchk_read_hessian(file,at_pair):
     hess : 3x3 numpy array of float64 type 
     """
     seq_numbers = atm_nbrs_2_seq_in_hess(at_pair)
-    line_pos_col_1 = [which_line_pos_5_per_line(seq_numbers[i]) for i in range(3)] # a list of tuples with (line_nr, position(col_nr)) in a block with 5 numbers per line
-    line_pos_col_2 = [which_line_pos_5_per_line(seq_numbers[i]+1) for i in range(3)]
-    line_pos_col_3 = [which_line_pos_5_per_line(seq_numbers[i]+2) for i in range(3)]
+    line_pos_col_1 = [which_line_pos(seq_numbers[i], 5) for i in range(3)] # a list of tuples with (line_nr, position(col_nr)) in a block with 5 numbers per line
+    line_pos_col_2 = [which_line_pos(seq_numbers[i]+1, 5) for i in range(3)]
+    line_pos_col_3 = [which_line_pos(seq_numbers[i]+2, 5) for i in range(3)]
     line_pos_merge = [line_pos_col_1, line_pos_col_2, line_pos_col_3]
     line_pos_in_seq = []
     for i in range(3):  # order (line, pos) is sequance as these elements will be read
@@ -404,7 +404,9 @@ def fchk_read_hessian(file,at_pair):
         if i == 0:
             skip_lines_tab.append( line_pos_in_seq[i][0] - 1 )
         else:
-            skip_lines_tab.append( line_pos_in_seq[i][0] - line_pos_in_seq[i-1][0] - 1 )
+            jump = ( line_pos_in_seq[i][0] - line_pos_in_seq[i-1][0] - 1 )
+            if jump != -1:
+                skip_lines_tab.append( jump )
     ster_list = gen_ster_list(line_pos_in_seq)      
     # w pliku file wyszukaj odp linii       
     hess_list = []   # 3x3 hessian elements in sequence (as read)     
@@ -441,7 +443,8 @@ def triple_to_2_bond_labels(triple):
     bc_list.sort()
     bc_label = tuple( bc_list )                    
     return ab_label, bc_label           
-                
+        
+        
 def read_section_from_input(file, flag_line, end_line):
     """reads a section (lines) from file
     contained between line starting with flag_line

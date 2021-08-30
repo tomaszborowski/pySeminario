@@ -3,14 +3,17 @@
 """
 Created on Tue Jul 27 13:11:10 2021
 
-@author: Szymon Szrajer, Tomasz Borowski
+@author: Szymon Szrajer, Tomasz Borowski, Zuzanna Wojdyla
+
+branch: zuza_debug
 """
 #import sys
 
 from pyseminario_aux import fchk_read_n_atoms, fchk_read_atoms, fchk_read_hessian
 from pyseminario_aux import Bond, Angle, triple_to_2_bond_labels, read_section_from_input
 
-
+# from pyseminario_aux_2808 import fchk_read_n_atoms, fchk_read_atoms, fchk_read_hessian
+# from pyseminario_aux_2808 import Bond, Angle, triple_to_2_bond_labels, read_section_from_input
 
 ### ---------------------------------------------------------------------- ###
 ### Seting the file names                                                  ###
@@ -19,9 +22,11 @@ from pyseminario_aux import Bond, Angle, triple_to_2_bond_labels, read_section_f
 
 ### ---------------------------------------------------------------------- ###
 ### test cases
-#inp_file_name = './pysem_test.inp'
-inp_file_name = './pysem_test_1.inp'
-
+#inp_file_name = './input_examples/pysem_test.inp'
+#inp_file_name = './input_examples/pysem_test_1.inp'
+#inp_file_name = './input_examples/pysem_test_2.inp'
+#inp_file_name = './input_examples/pysem_imidasole_bonds.inp'
+inp_file_name = './input_examples/pysem_imidasole_angles.inp'
 
 ### ---------------------------------------------------------------------- ###
 ### Setting files and for which bonds and angles k will be calculated      ###
