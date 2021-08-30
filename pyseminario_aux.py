@@ -189,19 +189,33 @@ class Angle(object):
     def set_u_pc(self):
         u_cb = self.bonds[1].get_u_ab()
         self.u_pc = np.cross(u_cb, self.u_n)
-    def set_k(self):     
-        lambdas_ba = self.bonds[0].get_lambdas_ba()
-        lambdas_bc = self.bonds[1].get_lambdas_ba()        
-        eig_vecs_ba = self.bonds[0].get_eig_vecs_ba()
-        eig_vecs_bc = self.bonds[1].get_eig_vecs_ba()        
+    def set_k(self):
+        label_ab = self.bonds[0].get_label()
+        label_cb = self.bonds[1].get_label()
+        if label_ab[0] == label_cb[0]: # take care to take AB and CB eigenvalues/vectors for A-B-C
+            lambdas_ab = self.bonds[0].get_lambdas_ba()
+            lambdas_cb = self.bonds[1].get_lambdas_ba()        
+            eig_vecs_ab = self.bonds[0].get_eig_vecs_ba()
+            eig_vecs_cb = self.bonds[1].get_eig_vecs_ba()
+        elif label_ab[1] == label_cb[0]:
+            lambdas_ab = self.bonds[0].get_lambdas_ab()
+            lambdas_cb = self.bonds[1].get_lambdas_ba()        
+            eig_vecs_ab = self.bonds[0].get_eig_vecs_ab()
+            eig_vecs_cb = self.bonds[1].get_eig_vecs_ba()
+        elif label_ab[1] == label_cb[1]:
+            lambdas_ab = self.bonds[0].get_lambdas_ab()
+            lambdas_cb = self.bonds[1].get_lambdas_ab()        
+            eig_vecs_ab = self.bonds[0].get_eig_vecs_ab()
+            eig_vecs_cb = self.bonds[1].get_eig_vecs_ab()            
+        
         r_ab = self.bonds[0].get_bond_length()
-        r_bc = self.bonds[1].get_bond_length()
+        r_cb = self.bonds[1].get_bond_length()
         #
-        p12 = sum(lambdas_ba[i] * np.abs(np.dot(self.u_pa, eig_vecs_ba[:, i])) for i in range(3))
+        p12 = sum(lambdas_ab[i] * np.abs(np.dot(self.u_pa, eig_vecs_ab[:, i])) for i in range(3))
         p1 = r_ab**2 * p12 # no averaging, movement of A
         #
-        p22 = sum(lambdas_bc[i] * np.abs(np.dot(self.u_pc, eig_vecs_bc[:, i])) for i in range(3))
-        p2 = r_bc**2 * p22 # no averaging, movement of C
+        p22 = sum(lambdas_cb[i] * np.abs(np.dot(self.u_pc, eig_vecs_cb[:, i])) for i in range(3))
+        p2 = r_cb**2 * p22 # no averaging, movement of C
         
         k_inv = (1.0 / p1) + (1.0 / p2)
         self.k = 1.0 / k_inv
@@ -221,7 +235,10 @@ def fchk_read_n_atoms(file):
     file.seek(0)
     flag_line = "Number of atoms"
     while True:
-        a = file.readline()
+        try:
+           a = file.readline()
+        except UnicodeDecodeError:
+           pass
         if not a:
             break
         if a[0] != ' ':
@@ -300,7 +317,10 @@ def fchk_read_atoms(file, at_numbers):
     file.seek(0)
     flag_line = "Atomic numbers"
     while True:
-        a = file.readline()
+        try:
+           a = file.readline()
+        except UnicodeDecodeError:
+           pass
         if not a:
             break
         if a[0] != ' ':
@@ -338,7 +358,10 @@ def fchk_read_atoms(file, at_numbers):
     file.seek(0)
     flag_line = "Current cartesian coordinates"
     while True:
-        a = file.readline()
+        try:
+           a = file.readline()
+        except UnicodeDecodeError:
+           pass
         if not a:
             break
         if a[0] != ' ':
@@ -413,7 +436,10 @@ def fchk_read_hessian(file,at_pair):
     file.seek(0)
     flag_line = "Cartesian Force Constants"
     while True:
-        a = file.readline()
+        try:
+           a = file.readline()
+        except UnicodeDecodeError:
+           pass
         if not a:
             break
         elif a[0] != ' ':
