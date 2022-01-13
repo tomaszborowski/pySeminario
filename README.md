@@ -1,5 +1,5 @@
 # pySeminario
-A python3 script computing bond and valence angle force constants using the Seminario (projected hessian) method.
+A python3 script computing bond and valence angle force constants using the Seminario (projected Hessian) method.
 
 Usage example:
 python3 pyseminario.py pysem.inp > pysem.out
@@ -24,7 +24,7 @@ h2o_fq_nosym.fchk
 
 Comments on the format of the input file:
 
-In the section %FILES <-> %END provide filenames (optionaly with path if not in the same directory) 
+In the section %FILES <-> %END provide filenames (one per line; optionaly with path if not in the same directory) 
 of fchk files (Gaussian) containing a Hessian
 
 In the section %BONDS <-> %END provide pairs (one per line) of atom numbers for bonds for which force constant
