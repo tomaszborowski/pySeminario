@@ -1,32 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jul 27 13:11:10 2021
+A python3 script computing bond and valence angle force constants using 
+the Seminario (projected hessian) method.
 
-@author: Szymon Szrajer, Tomasz Borowski, Zuzanna Wojdyla
+@authors: Szymon Szrajer, Zuzanna Wojdyla, Tomasz Borowski
 
-branch: zuza_debug
+Last update: 13.01.2022
 """
-#import sys
+import sys
 
 from pyseminario_aux import fchk_read_n_atoms, fchk_read_atoms, fchk_read_hessian
 from pyseminario_aux import Bond, Angle, triple_to_2_bond_labels, read_section_from_input
 
-# from pyseminario_aux_2808 import fchk_read_n_atoms, fchk_read_atoms, fchk_read_hessian
-# from pyseminario_aux_2808 import Bond, Angle, triple_to_2_bond_labels, read_section_from_input
 
 ### ---------------------------------------------------------------------- ###
 ### Seting the file names                                                  ###
-# inp_file_name = sys.argv[1]
+inp_file_name = sys.argv[1]
 
-
-### ---------------------------------------------------------------------- ###
-### test cases
-#inp_file_name = './input_examples/pysem_test.inp'
-#inp_file_name = './input_examples/pysem_test_1.inp'
-#inp_file_name = './input_examples/pysem_test_2.inp'
-inp_file_name = './input_examples/pysem_imidasole_bonds.inp'
-#inp_file_name = './input_examples/pysem_imidasole_angles.inp'
 
 ### ---------------------------------------------------------------------- ###
 ### Setting files and for which bonds and angles k will be calculated      ###
