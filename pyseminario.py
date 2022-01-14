@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 A python3 script computing bond and valence angle force constants using 
-the Seminario (projected hessian) method.
+the Seminario (projected Hessian) method.
 
 @authors: Szymon Szrajer, Zuzanna Wojdyla, Tomasz Borowski
 
@@ -63,7 +63,7 @@ atoms_2_calc = list(set(atoms_2_calc))
 atoms_2_calc.sort()
 
 ##############################################################################
-# Main loop through the chk files
+# Main loop through the fchk files
 results = [] # a list of dictionaries, one per fchk file
 
 for i in range(len(chk_file_names)):
