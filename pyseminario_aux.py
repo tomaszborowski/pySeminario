@@ -5,7 +5,7 @@ a collection of classes and functions for pyseminario
 
 Authors: Szymon Szrajer, Zuzanna Wojdyla, Tomasz Borowski
 
-Last update: 13.01.2022
+Last update: 7.09.2022
 """
 
 import numpy as np
@@ -335,7 +335,7 @@ def fchk_read_atoms(file, at_numbers):
                        a_split = a.split()
                        l_a_split = len(a_split)
                        for j in range(l_a_split):
-                           if j+1 == which_position[atom_counter]:
+                           if j+1 == which_position[atom_counter] and line_counter == which_line[atom_counter]:
                                atomic_numbers.append( eval(a_split[j]) )
                                atom_counter += 1
                                if atom_counter >= n_atom_2_read:
