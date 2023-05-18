@@ -7,17 +7,30 @@ the Seminario (projected Hessian) method.
 @authors: Szymon Szrajer, Zuzanna Wojdyla, Tomasz Borowski
 
 Last update: 13.01.2022
+Last update: 18.05.2023
 """
 import sys
 
 from pyseminario_aux import fchk_read_n_atoms, fchk_read_atoms, fchk_read_hessian
-from pyseminario_aux import Bond, Angle, triple_to_2_bond_labels, read_section_from_input
+from pyseminario_aux import Bond, Angle, triple_to_2_bond_labels, read_section_from_input, print_help
 
 
 ### ---------------------------------------------------------------------- ###
 ### Seting the file names                                                  ###
-inp_file_name = sys.argv[1]
+sys_argv_len = len(sys.argv)
+if sys_argv_len > 1:
+    inp_file_name = sys.argv[1]
+else:
+    inp_file_name = None
 
+if inp_file_name == None:
+    print("pySeminario input file not found \n")
+    sys.exit(1)
+
+### if -h - write help and exit                                            ###
+if inp_file_name == "-h":
+    print_help()
+    sys.exit(1)
 
 ### ---------------------------------------------------------------------- ###
 ### Setting files and for which bonds and angles k will be calculated      ###
